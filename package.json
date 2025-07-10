@@ -1,5 +1,14 @@
 {
+  "type": "module",
+  "name": "facebook_crawler",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Natori",
+  "license": "MIT",
   "dependencies": {
-    "puppeteer": "^10.2.0"
+    "axios": "^1.10.0",
+    "dotenv": "^17.2.0",
+    "fs": "^0.0.1-security",
+    "puppeteer": "^24.11.2"
   }
 }

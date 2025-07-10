@@ -13,4 +13,8 @@ yarn.lock
 .yarnclean
 .vscode
 .idea
+.env
+
 img
+images
+data.jsonl
