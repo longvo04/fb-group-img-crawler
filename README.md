@@ -82,6 +82,7 @@ This is a Node.js tool for crawling data (author, images, captions) from Faceboo
 ```json
 {
   "author": "John Doe",
+  "userID": "1312312312314",
   "postUrl": "https://www.facebook.com/photo/?fbid=9283746510928374&set=g.3701984628374651",
   "permalink": "https://www.facebook.com/groups/3701984628374651/permalink/9283746510928374/",
   "title": "Lorem ipsum dolor sit amet",
@@ -92,6 +93,7 @@ This is a Node.js tool for crawling data (author, images, captions) from Faceboo
 | Field       | Description                                                                                                                         |
 | ----------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | `author`    | Author name.                                                                                      |
+| `userID`   | User's Id.                                                                            |
 | `postUrl`   | Direct link to the Facebook photo page that was crawled.                                                                            |
 | `permalink` | Permanent link to the full Facebook post (if available).
 | `title`     | The caption or message content of the post.                                                                                         |

@@ -11,6 +11,7 @@ const USER_NAME = process.env.USER_NAME
 const PASSWORD = process.env.PASSWORD
 const START_URL = process.env.START_URL
 const MUTE = process.argv.includes('--mute') || process.env.MUTE === 'true' || process.env.MUTE === '1';
+
 if (MUTE) console.log = () => {};
 const getID = (() => {
     let myId = 0
@@ -18,6 +19,16 @@ const getID = (() => {
         return ++myId;
     }
 })();
+
+const extractUserId = (url) => {
+    const regex = /\/user\/(\d+)/
+    const match = url.match(regex);
+    if (match) {
+        return match[1];
+    }
+    throw new Error('Invalid Facebook URL format');
+    
+}
 
 class fileEmitter extends EventEmitter {}
 const fileEvent = new fileEmitter();
@@ -132,7 +143,7 @@ const login = async (page) => {
 }
 
 const scrape = async () => {
-    const browser = await puppeteer.launch({ headless: true, protocolTimeout: 0, args: ['--no-sandbox', '--disable-setuid-sandbox', '--mute-audio'] })
+    const browser = await puppeteer.launch({ headless: false, protocolTimeout: 0, args: ['--no-sandbox', '--disable-setuid-sandbox', '--mute-audio'] })
     const page = await browser.newPage()
     page.setDefaultTimeout(0)
     page.setDefaultNavigationTimeout(300000)
@@ -155,6 +166,7 @@ const scrape = async () => {
     await page.$eval('[aria-modal="true"][role="alertdialog"] button', el => el.click());
 
     const dynamicLinkSelector = '[role="complementary"] span[dir] a' // Either link to full post or author's profile
+    const authorUrlSelector = '[role="complementary"] h2 a' // Link to author's profile
     const nextBtnSelector = '[data-name="media-viewer-nav-container"] [data-visualcompletion="ignore-dynamic"]:last-child>[role="button"]'
     const seeMoreSelector = '[role="complementary"] [dir="auto"] [role="button"]'
     const imgSelector = '[data-name="media-viewer-nav-container"] + div img'
@@ -163,6 +175,7 @@ const scrape = async () => {
     let attempt = 1;
     const postData = {
         author: '',
+        userID: '',
         postUrl: '',
         permalink: '',
         title: '',
@@ -198,6 +211,8 @@ const scrape = async () => {
                     // console.log(postData);
                 }
                 const author = await page.$eval(dynamicLinkSelector, el => el.textContent).catch(() => 'No author found');
+                await page.waitForSelector(authorUrlSelector, { timeout: 10000 }).catch(() => null);
+                const userID = await page.$eval(authorUrlSelector, el => el.href).then(url => extractUserId(url)).catch(() => null);
                 await page.$eval(seeMoreSelector, el => el.click()).catch(() => null);
                 const title = await page.evaluate((postBodySelector) => {
                     const bod = document.querySelectorAll(postBodySelector)
@@ -206,6 +221,7 @@ const scrape = async () => {
                 },'[role="complementary"] [dir="auto"]')
                 const imgUrl = await page.$eval(imgSelector, el => el.src).catch(() => null);
                 postData.author = author;
+                postData.userID = userID;
                 postData.postUrl = page.url();
                 postData.title = title;
                 postData.imgPaths = imgUrl ? [imgUrl] : [];
@@ -219,6 +235,8 @@ const scrape = async () => {
 
                     postData.author = '';
                     postData.title = '';
+                    await page.waitForSelector(authorUrlSelector, { timeout: 10000 }).catch(() => null);
+                    postData.userID = await page.$eval(authorUrlSelector, el => el.href).then(url => extractUserId(url)).catch(() => null);
                     postData.postUrl = page.url();
                     postData.permalink = '';
                     postData.imgPaths = [];
