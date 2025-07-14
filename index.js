@@ -143,7 +143,7 @@ const login = async (page) => {
 }
 
 const scrape = async () => {
-    const browser = await puppeteer.launch({ headless: false, protocolTimeout: 0, args: ['--no-sandbox', '--disable-setuid-sandbox', '--mute-audio'] })
+    const browser = await puppeteer.launch({ headless: true, protocolTimeout: 0, args: ['--no-sandbox', '--disable-setuid-sandbox', '--mute-audio'] })
     const page = await browser.newPage()
     page.setDefaultTimeout(0)
     page.setDefaultNavigationTimeout(300000)
